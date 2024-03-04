@@ -107,7 +107,7 @@ class Game {
     }
 
     void Handle(const std::uint64_t tick) {
-        if (tick - lastUpdateTick >= 100) {
+        if (tick - lastUpdateTick >= 1e8) {
             lastUpdateTick = tick;
             if (dir == -1)
                 return;
@@ -168,7 +168,9 @@ class Game {
         SDL_RenderTexture(app.renderer, restartTextTexture, nullptr, &destinationRect);
     }
 
-    void Draw() {
+    void Draw(const std::uint64_t tick) {
+        if (tick != lastUpdateTick)
+            return;
         SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
         SDL_RenderClear(app.renderer);
 

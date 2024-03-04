@@ -29,8 +29,10 @@ int main() {
             }
         }
 
-        game.Handle(SDL_GetTicks());
-        game.Draw();
+        std::uint64_t ticks = SDL_GetTicksNS();
+
+        game.Handle(ticks);
+        game.Draw(ticks);
 
         app->frameEndTime = SDL_GetTicksNS();
         app->frameTime = app->frameEndTime - app->frameStartTime;
