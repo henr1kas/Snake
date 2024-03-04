@@ -75,25 +75,25 @@ class Game {
         switch (ev->key.keysym.sym) {
             case SDLK_LEFT:
             case SDLK_a: {
-                if (dir != 1)
+                if (dir != 1 && !snake.empty() && snake.size() != 192)
                     dir = 0;
                 break;
             }
             case SDLK_RIGHT:
             case SDLK_d: {
-                if (dir != 0)
+                if (dir != 0 && !snake.empty() && snake.size() != 192)
                     dir = 1;
                 break;
             }
             case SDLK_UP:
             case SDLK_w: {
-                if (dir != 3)
+                if (dir != 3 && !snake.empty() && snake.size() != 192)
                     dir = 2;
                 break;
             }
             case SDLK_DOWN:
             case SDLK_s: {
-                if (dir != 2)
+                if (dir != 2 && !snake.empty() && snake.size() != 192)
                     dir = 3;
                 break;
             }
