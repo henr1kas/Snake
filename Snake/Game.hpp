@@ -6,7 +6,7 @@
 #include "Utils.hpp"
 
 class Game {
-    App app;
+    App* app;
 
     enum eTileType : std::uint8_t {
         NOTHING,
@@ -39,10 +39,7 @@ class Game {
     std::int8_t dir = -1;
 
   public:
-
-    App* GetApp() {
-        return &app;  
-    }
+    Game(App* pApp) : app(pApp) {}
 
     std::uint8_t ScreenToWorld(const float posX, const float posY) {
         return static_cast<std::uint8_t>(std::floor(posY / 50) * 16 + std::floor(posX / 50));
@@ -106,7 +103,7 @@ class Game {
         }
     }
 
-    void Handle(const std::uint64_t tick) {
+    void Update(const std::uint64_t tick) {
         if (tick - lastUpdateTick >= 1e8) {
             lastUpdateTick = tick;
             if (dir == -1)
@@ -154,39 +151,31 @@ class Game {
         }
     }
 
-    void DrawLoss() {
-        SDL_FRect destinationRect = {300, 275, 200, 50};
-        SDL_RenderTexture(app.renderer, lostTextTexture, nullptr, &destinationRect);
-        destinationRect = {300, 325, 200, 15};
-        SDL_RenderTexture(app.renderer, restartTextTexture, nullptr, &destinationRect);
-    }
-
-    void DrawWin() {
-        SDL_FRect destinationRect = {300, 275, 200, 50};
-        SDL_RenderTexture(app.renderer, wonTextTexture, nullptr, &destinationRect);
-        destinationRect = {300, 325, 200, 15};
-        SDL_RenderTexture(app.renderer, restartTextTexture, nullptr, &destinationRect);
-    }
-
     void Draw(const std::uint64_t tick) {
         if (tick != lastUpdateTick)
             return;
-        SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
-        SDL_RenderClear(app.renderer);
+        SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
+        SDL_RenderClear(app->renderer);
 
         switch (snake.size()) {
             case 0: {
-                DrawLoss();
+                SDL_FRect destinationRect = {300, 275, 200, 50};
+                SDL_RenderTexture(app->renderer, lostTextTexture, nullptr, &destinationRect);
+                destinationRect = {300, 325, 200, 15};
+                SDL_RenderTexture(app->renderer, restartTextTexture, nullptr, &destinationRect);
                 dir = -1;
                 break;
             }
             case 192: {
-                DrawWin();
+                SDL_FRect destinationRect = {300, 275, 200, 50};
+                SDL_RenderTexture(app->renderer, wonTextTexture, nullptr, &destinationRect);
+                destinationRect = {300, 325, 200, 15};
+                SDL_RenderTexture(app->renderer, restartTextTexture, nullptr, &destinationRect);
                 dir = -1;
                 break;
             }
             default: {
-                SDL_SetRenderDrawColor(app.renderer, appleColor[0], appleColor[1], appleColor[2], appleColor[3]);
+                SDL_SetRenderDrawColor(app->renderer, appleColor[0], appleColor[1], appleColor[2], appleColor[3]);
                 SDL_FRect appleRects[192];
                 SDL_FRect snakeRects[192];
                 SDL_FRect gridRects[192];
@@ -203,11 +192,11 @@ class Game {
                     gridRects[gridCount++] = position;
                 }
 
-                SDL_SetRenderDrawColor(app.renderer, appleColor[0], appleColor[1], appleColor[2], appleColor[3]);
-                SDL_RenderFillRects(app.renderer, appleRects, appleCount);
+                SDL_SetRenderDrawColor(app->renderer, appleColor[0], appleColor[1], appleColor[2], appleColor[3]);
+                SDL_RenderFillRects(app->renderer, appleRects, appleCount);
 
-                SDL_SetRenderDrawColor(app.renderer, gridColor[0], gridColor[1], gridColor[2], gridColor[3]);
-                SDL_RenderRects(app.renderer, gridRects, gridCount);
+                SDL_SetRenderDrawColor(app->renderer, gridColor[0], gridColor[1], gridColor[2], gridColor[3]);
+                SDL_RenderRects(app->renderer, gridRects, gridCount);
 
                 for (const std::uint8_t tile : snake) {
                     std::pair<float, float> pos = WorldToScreen(tile);
@@ -215,27 +204,27 @@ class Game {
                     snakeRects[snakeCount++] = position;
                 }
 
-                SDL_SetRenderDrawColor(app.renderer, snakeColor[0], snakeColor[1], snakeColor[2], snakeColor[3]);
-                SDL_RenderFillRects(app.renderer, snakeRects, snakeCount);
+                SDL_SetRenderDrawColor(app->renderer, snakeColor[0], snakeColor[1], snakeColor[2], snakeColor[3]);
+                SDL_RenderFillRects(app->renderer, snakeRects, snakeCount);
                 break;
             }
         }
 
-        SDL_RenderPresent(app.renderer);
+        SDL_RenderPresent(app->renderer);
     }
 
     bool InitTextures() {
-        lostTextTexture = app.CreateTextTexture(0, "You lost!", 255, 0, 0);
+        lostTextTexture = app->CreateTextTexture(0, "You lost!", 255, 0, 0);
         if (!lostTextTexture) {
             return false;
         }
 
-        wonTextTexture = app.CreateTextTexture(0, "You won!", 0, 255, 0);
+        wonTextTexture = app->CreateTextTexture(0, "You won!", 0, 255, 0);
         if (!wonTextTexture) {
             return false;
         }
 
-        restartTextTexture = app.CreateTextTexture(1, "Press R to restart", 255, 0, 0);
+        restartTextTexture = app->CreateTextTexture(1, "Press R to restart", 255, 0, 0);
         if (!restartTextTexture) {
             return false;
         }
@@ -244,10 +233,6 @@ class Game {
     }
 
     bool Init() {
-        if (!app.Init("Snake", 800, 600)) {
-            return false;
-        }
-        app.SetFPSLimit(60);
         if (!InitTextures())
             return false;
         InitGame();
@@ -258,6 +243,6 @@ class Game {
         SDL_DestroyTexture(restartTextTexture);
         SDL_DestroyTexture(lostTextTexture);
         SDL_DestroyTexture(wonTextTexture);
-        app.Destroy();
+        app->Destroy();
     }
 };
