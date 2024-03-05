@@ -175,7 +175,6 @@ class Game {
                 break;
             }
             default: {
-                SDL_SetRenderDrawColor(app->renderer, appleColor[0], appleColor[1], appleColor[2], appleColor[3]);
                 SDL_FRect appleRects[192];
                 SDL_FRect snakeRects[192];
                 SDL_FRect gridRects[192];
@@ -188,6 +187,8 @@ class Game {
 
                     if (tiles[i] == APPLE) {
                         appleRects[appleCount++] = position;
+                    } else if (tiles[i] == SNAKE) {
+                        snakeRects[snakeCount++] = position;
                     }
                     gridRects[gridCount++] = position;
                 }
@@ -197,12 +198,6 @@ class Game {
 
                 SDL_SetRenderDrawColor(app->renderer, gridColor[0], gridColor[1], gridColor[2], gridColor[3]);
                 SDL_RenderRects(app->renderer, gridRects, gridCount);
-
-                for (const std::uint8_t tile : snake) {
-                    std::pair<float, float> pos = WorldToScreen(tile);
-                    SDL_FRect position{pos.first, pos.second, 50.f, 50.f};
-                    snakeRects[snakeCount++] = position;
-                }
 
                 SDL_SetRenderDrawColor(app->renderer, snakeColor[0], snakeColor[1], snakeColor[2], snakeColor[3]);
                 SDL_RenderFillRects(app->renderer, snakeRects, snakeCount);
